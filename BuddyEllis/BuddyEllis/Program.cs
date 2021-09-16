@@ -2,11 +2,12 @@
 {
     using System;
     using System.Net.Http;
+    using System.Net.Http.Json;
     using System.Timers;
 
     public class Program
     {
-        public static void Main(string[] args)
+        public static void Main()
         {
             try
             {
@@ -49,12 +50,28 @@
 
                         HttpResponseMessage response = await client.GetAsync(url);
 
-                        if (response.IsSuccessStatusCode)
-                            Console.WriteLine("success");
-                        else
-                            Console.WriteLine("failure");
+                        if (!response.IsSuccessStatusCode)
+                        {
+                            Console.WriteLine("failure to connect to server");
+                            Console.WriteLine("Quit?");
+                            return;
+                        }
 
-                        Console.WriteLine("Quit? ");
+                        var updoot = await response.Content.ReadFromJsonAsync<UpdootResponse>();
+
+                        if (updoot.Success)
+                        {
+                            Console.Write("updoot success");
+                        }
+                        else
+                        {
+                            if (updoot.Message == "duplicate")
+                                Console.WriteLine("duplicate updoot, will try again later");
+                            else
+                                Console.WriteLine("updoot failed, try again but if it continues to fail let us know");
+                        }
+
+                        Console.WriteLine("Quit?");
                     };
 
                     timer.Start();
@@ -62,7 +79,7 @@
 
                     while (true)
                     {
-                        Console.WriteLine("Quit? ");
+                        Console.WriteLine("Quit?");
                         string? input = Console.ReadLine();
                         if (string.Equals(input, "y", StringComparison.InvariantCultureIgnoreCase))
                             break;
@@ -71,6 +88,15 @@
                     Console.WriteLine("Stopping");
                     timer.Stop();
                 }
+            }
+
+            private class UpdootResponse
+            {
+                public string Error { get; set; }
+
+                public string Message { get; set; }
+
+                public bool Success { get; set; }
             }
         }
     }
