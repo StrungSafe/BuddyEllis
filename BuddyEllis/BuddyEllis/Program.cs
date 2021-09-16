@@ -26,7 +26,7 @@
         {
             private const int InitialInterval = 1000;
 
-            private const int Interval = 60000;
+            private const int Interval = 3600000 + 60000;
 
             private bool firstRun = true;
 
@@ -46,6 +46,7 @@
 
                         var url =
                             "https://tools.gardenandgunmag.com/vote.php?id=1558&s=3&v1=kbkZbfjaor&v2=0a1ba1cbc54e642dc57ea5979b88b1e4&cv=y&_=1631821163291";
+
                         using (var client = new HttpClient())
                         {
                             using (HttpResponseMessage response = await client.GetAsync(url))
@@ -61,7 +62,7 @@
 
                                 if (updoot.Success)
                                 {
-                                    Console.Write("updoot success");
+                                    Console.WriteLine("updoot success");
                                 }
                                 else
                                 {
