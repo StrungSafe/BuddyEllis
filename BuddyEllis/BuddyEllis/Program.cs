@@ -65,7 +65,7 @@
                         }
                         else
                         {
-                            if (updoot.Message == "duplicate")
+                            if (updoot.Error == "duplicate")
                                 Console.WriteLine("duplicate updoot, will try again later");
                             else
                                 Console.WriteLine("updoot failed, try again but if it continues to fail let us know");
