@@ -26,7 +26,7 @@
         {
             private const int InitialInterval = 1000;
 
-            private const int Interval = 3600000 + 60000;
+            private const int Interval = 60000;
 
             private bool firstRun = true;
 
@@ -46,32 +46,35 @@
 
                         var url =
                             "https://tools.gardenandgunmag.com/vote.php?id=1558&s=3&v1=kbkZbfjaor&v2=0a1ba1cbc54e642dc57ea5979b88b1e4&cv=y&_=1631821163291";
-                        var client = new HttpClient();
-
-                        HttpResponseMessage response = await client.GetAsync(url);
-
-                        if (!response.IsSuccessStatusCode)
+                        using (var client = new HttpClient())
                         {
-                            Console.WriteLine("failure to connect to server");
-                            Console.WriteLine("Quit?");
-                            return;
-                        }
+                            using (HttpResponseMessage response = await client.GetAsync(url))
+                            {
+                                if (!response.IsSuccessStatusCode)
+                                {
+                                    Console.WriteLine("failure to connect to server");
+                                    Console.WriteLine("Quit?");
+                                    return;
+                                }
 
-                        var updoot = await response.Content.ReadFromJsonAsync<UpdootResponse>();
+                                var updoot = await response.Content.ReadFromJsonAsync<UpdootResponse>();
 
-                        if (updoot.Success)
-                        {
-                            Console.Write("updoot success");
-                        }
-                        else
-                        {
-                            if (updoot.Error == "duplicate")
-                                Console.WriteLine("duplicate updoot, will try again later");
-                            else
-                                Console.WriteLine("updoot failed, try again but if it continues to fail let us know");
-                        }
+                                if (updoot.Success)
+                                {
+                                    Console.Write("updoot success");
+                                }
+                                else
+                                {
+                                    if (updoot.Error == "duplicate")
+                                        Console.WriteLine("duplicate updoot, will try again later");
+                                    else
+                                        Console.WriteLine(
+                                            "updoot failed, try again but if it continues to fail let us know");
+                                }
 
-                        Console.WriteLine("Quit?");
+                                Console.WriteLine("Quit?");
+                            }
+                        }
                     };
 
                     timer.Start();
