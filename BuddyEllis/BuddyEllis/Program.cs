@@ -24,11 +24,11 @@
 
         private class BuddyEllis
         {
-            private const int InitialInterval = 1000;
+            private const int InitialInterval = 1 * 1000;
 
-            private const int Interval = 3600000 + 60000;
+            private const int Interval = (60 * 60 * 1000) + (15 * 1000);
 
-            private bool firstRun = true;
+            private readonly bool usingInterval = false;
 
             public void Run()
             {
@@ -36,16 +36,14 @@
                 {
                     timer.Elapsed += async (sender, e) =>
                     {
-                        if (firstRun && timer != null)
-                        {
-                            timer.Interval = Interval;
-                            firstRun = false;
-                        }
-
                         Console.WriteLine("attempting updoot");
 
                         var url =
                             "https://tools.gardenandgunmag.com/vote.php?id=1558&s=3&v1=kbkZbfjaor&v2=0a1ba1cbc54e642dc57ea5979b88b1e4&cv=y&_=1631821163291";
+
+                        bool success;
+                        double currentInterval = timer?.Interval ?? 0;
+                        double doubledInterval = currentInterval * 2;
 
                         using (var client = new HttpClient())
                         {
@@ -59,6 +57,7 @@
                                 }
 
                                 var updoot = await response.Content.ReadFromJsonAsync<UpdootResponse>();
+                                success = updoot.Success;
 
                                 if (updoot.Success)
                                 {
@@ -67,7 +66,8 @@
                                 else
                                 {
                                     if (updoot.Error == "duplicate")
-                                        Console.WriteLine("duplicate updoot, will try again later");
+                                        Console.WriteLine(
+                                            $"duplicate updoot, will try again in {doubledInterval / 1000} seconds");
                                     else
                                         Console.WriteLine(
                                             "updoot failed, try again but if it continues to fail let us know");
@@ -75,6 +75,17 @@
 
                                 Console.WriteLine("Quit?");
                             }
+                        }
+
+                        if (timer == null)
+                            return;
+
+                        if (!usingInterval)
+                        {
+                            if (success || doubledInterval > Interval)
+                                timer.Interval = Interval;
+                            else
+                                timer.Interval = doubledInterval;
                         }
                     };
 
